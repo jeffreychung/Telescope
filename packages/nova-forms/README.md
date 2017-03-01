@@ -117,9 +117,9 @@ If present, the document to edit. If not present, the form will be a “new docu
 
 The current user.
 
-###### `submitCallback()`
+###### `submitCallback(data)`
 
-A callback called on form submission.
+A callback called on form submission on the form data. Should return the `data` object as well.
 
 ###### `successCallback(document)`
 
@@ -189,6 +189,18 @@ postedAt: {
 
 Note that fields with no groups are always rendered first in the form. 
 
+###### `placeholder`
+
+A placeholder value for the form field. 
+
+###### `beforeComponent`
+
+A React component that will be inserted just before the form component itself.
+
+###### `afterComponent`
+
+A React component that will be inserted just after the form component itself.
+
 ### Context
 
 The main `NovaForm` components makes the following objects available as context to all its children:
@@ -204,6 +216,10 @@ A function that takes a property, and adds it to the `autofilledValues` object.
 ###### `throwError({content, type})`
 
 A callback function that can be used to throw an error. 
+
+###### `getDocument()`
+
+A function that lets you retrieve the current document from a form component.
 
 ### Handling Values
 

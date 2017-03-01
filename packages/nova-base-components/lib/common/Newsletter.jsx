@@ -6,7 +6,7 @@ import { Input } from 'formsy-react-components';
 import { Button } from 'react-bootstrap';
 import Cookie from 'react-cookie';
 //import { Messages } from "meteor/nova:core";
-
+import Users from 'meteor/nova:users';
 
 class Newsletter extends Component {
 
@@ -60,6 +60,14 @@ class Newsletter extends Component {
     Cookie.save('showBanner', "no");
   }
 
+  renderButton() {
+    return <Telescope.components.NewsletterButton
+              successCallback={() => this.successCallbackSubscription}
+              subscribeText={this.context.intl.formatMessage({id: "newsletter.subscribe"})}
+              user={this.context.currentUser}
+            />
+  }
+
   renderForm() {
     return (
       <Formsy.Form className="newsletter-form" onSubmit={this.subscribeEmail}>
@@ -76,20 +84,12 @@ class Newsletter extends Component {
   }
 
   render() {
-    const currentUser = this.context.currentUser;
 
     return this.state.showBanner
       ? (
         <div className="newsletter">
           <h4 className="newsletter-tagline"><FormattedMessage id="newsletter.subscribe_prompt"/></h4>
-          {this.context.currentUser
-            ? <Telescope.components.NewsletterButton
-                successCallback={() => this.successCallbackSubscription}
-                subscribeText={this.context.intl.formatMessage({id: "newsletter.subscribe"})}
-                user={currentUser}
-              />
-            : this.renderForm()
-          }
+          {this.context.currentUser ? this.renderButton() : this.renderForm()}
           <a onClick={this.dismissBanner} className="newsletter-close"><Telescope.components.Icon name="close"/></a>
         </div>
       ) : null;

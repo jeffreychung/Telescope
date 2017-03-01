@@ -1,11 +1,13 @@
 import React from 'react';
 import {mount} from 'react-mounter';
-
+import { Messages } from 'meteor/nova:core';
 import { IndexRoute, Route, useRouterHistory, browserHistory, createMemoryHistory } from 'react-router';
 import { ReactRouterSSR } from 'meteor/reactrouter:react-router-ssr';
 import { ListContainer, DocumentContainer } from "meteor/utilities:react-list-container";
-import useNamedRoutes from 'use-named-routes';
+// import useNamedRoutes from 'use-named-routes';
 import createBrowserHistory from 'history/lib/createBrowserHistory';
+import Events from "meteor/nova:events";
+import Helmet from 'react-helmet';
 
 // // ------------------------------------- Other -------------------------------- //
 
@@ -37,16 +39,21 @@ Meteor.startup(() => {
 
   const clientOptions = {}, serverOptions = {};
 
-  if (Meteor.isClient) {
-    history = useNamedRoutes(useRouterHistory(createBrowserHistory))({ routes: AppRoutes });
+  // if (Meteor.isClient) {
+  //   history = useNamedRoutes(useRouterHistory(createBrowserHistory))({ routes: AppRoutes });
+  // }
+
+  // if (Meteor.isServer) {
+  //   history = useNamedRoutes(useRouterHistory(createMemoryHistory))({ routes: AppRoutes });
+  // }
+
+  clientOptions.props = {onUpdate: () => {Events.analyticsRequest(); Messages.clearSeen();}};
+
+  serverOptions.htmlHook = (html) => {
+    const head = Helmet.rewind();
+    return html.replace('<head>', '<head>'+ head.title + head.meta + head.link);    
   }
-
-  if (Meteor.isServer) {
-    history = useNamedRoutes(useRouterHistory(createMemoryHistory))({ routes: AppRoutes });
-  }
-
-  clientOptions.props = {onUpdate: Events.analyticsRequest};
-
+  
   // ReactRouterSSR.Run(AppRoutes, {historyHook: () => history}, {historyHook: () => history});
   ReactRouterSSR.Run(AppRoutes, clientOptions, serverOptions);
 

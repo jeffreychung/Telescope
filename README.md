@@ -15,18 +15,22 @@ Note that both versions use the same data format, so you can go back and forth b
   - [Resources](#resources)
   - [Deployment](#deployment)
   - [Settings](#settings)
+  - [Categories](#categories)
   - [Social Login](#social-login)
   - [Packages](#packages)
   - [Application Structure](#application-structure)
   - [Files](#files)
+  - [Customizing Components](#customizing-components)
   - [Customizing Emails](#customizing-emails)
   - [Custom Fields](#custom-fields)
   - [Publishing Data](#publishing-data)
+  - [Subscribing](#subscribing)
   - [Loading Data](#loading-data)
   - [Callbacks](#callbacks)
   - [Posts Parameters](#posts-parameters)
   - [Forms](#forms)
   - [Methods](#methods)
+  - [Routes](#routes)
   - [Internationalization](#internationalization)
   - [Cheatsheet](#cheatsheet)
 
@@ -108,7 +112,7 @@ The recommended way to deploy Nova is by using [MupX](https://github.com/arunoda
 
 ## Settings
 
-Settings can be configured via the in-app UI (in which case they'll be stored in the Mongo database), or specified in a `settings.json` file. Using the in-app UI is easier, but using `settings.json` is recommended to make deploying easier. Note that settings specified in `settings.json` take priority over those stored in the database.
+Settings can be configured in your `settings.json` file. For legacy compatibility reasons, settings can also be specified in your database, but note that settings specified in `settings.json` take priority over those stored in the database.
 
 Settings can be public (meaning they will be published to the client) or private (they will be kept on the server). Public settings should be set on the `public` object. You can find a full example in `sample_settings.json`.
 
@@ -237,7 +241,7 @@ Nova tries to maintain a consistent file structure for its main packages:
 - `collection.js`: the package's collection schema.
 - `callbacks.js`: callbacks used by the package.
 - `helpers.js`: collection helpers.
-- `methods.js`: collectiom methods.
+- `methods.js`: collection methods.
 - `published_fields.js`: specifies which collection fields should be published in which context.
 - `custom_fields.js`: sets custom fields on *other* collections.
 - `routes.jsx`: routes.
@@ -280,7 +284,9 @@ Telescope.components.Logo = CustomLogo;
 
 Components are generally defined as functional stateless components, unless they contain extra logic (lifecycle methods, event handlers, etc.) in which case they'll be defined as ES6 classes. 
 
-Nova components are resolved at render. So you just need to make the override anytime before the `<Logo/>` component is called from a parent component. 
+For components defined as ES6 classes, make sure you `extend` the original component. This will let you pick and choose which methods you actually need to replace, while inheriting the ones you didn't specify in your new component. 
+
+You can make the override at any point, as long as it happens before the `<Telescope.components.Logo/>` component is called from a parent component. 
 
 ### Clone & Modify
 
@@ -383,6 +389,20 @@ import PublicationUtils from 'meteor/utilities:smart-publications';
 PublicationUtils.addToFields(Posts.publishedFields.list, ["thumbnailUrl", "media", "sourceName", "sourceUrl"]);
 ```
 
+## Subscribing
+
+If you create your own new subscription, you can tell Nova to preload it (and wait for it to be loaded) with:
+
+```js
+Telescope.subscriptions.preload(subscriptionName, subscriptionArguments);
+```
+
+For example:
+
+```js
+Telescope.subscriptions.preload("posts.featured", {featuredPostId: "foo123"});
+```
+
 ## Loading Data
 
 To load data and display it as a list of documents (or a single document), Nova uses the [React List Container](https://github.com/meteor-utilities/react-list-container) package to connect to the publications mentioned in the previous section.  
@@ -453,6 +473,18 @@ See [nova:forms](https://github.com/TelescopeJS/Telescope/tree/devel/packages/no
 
 You can use regular Meteor methods, or [Smart Methods](https://github.com/meteor-utilities/smart-methods).
 
+## Routes
+
+Here's how you can add routes to your app (using React Router):
+
+```js
+Telescope.routes.add({
+  name: "foo",
+  path: "/foo",
+  component: Foo
+});
+```
+
 ## Internationalization
 
 Nova is internationalized using [react-intl](https://github.com/yahoo/react-intl/). To add a new language, you need to:
@@ -465,7 +497,9 @@ Note: make sure the locale you set matches the language package you're adding.
 
 If you create a new internationalization package, let us know so we can add it here!
 
-- [fr_FR](https://github.com/TelescopeJS/nova-i18n-fr-fr)
+- [fr-FR](https://github.com/TelescopeJS/nova-i18n-fr-fr)
+- [es-ES](https://atmospherejs.com/fcallem/nova-i18n-es-es)
+- [ru-RU](https://github.com/fortunto2/nova-i18n-ru-ru)
 
 ## Cheatsheet
 
@@ -474,3 +508,5 @@ You can access a dynamically generated cheatsheet of Nova's main functions at [h
 ## Third-Party Plugins
 
 - [Post By Feed](https://github.com/xavcz/nova-post-by-feed): register RSS feeds that will be fetched every 30 minutes to create new posts automatically.
+- [Nova-Slack](https://github.com/xavcz/nova-slack): A package that automatically sends your posts as messages to any connected Slack Team.
+
